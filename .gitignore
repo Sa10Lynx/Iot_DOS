@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local captures and generated traffic files
+*.pcap
+*.pcapng
+web_interface/captures/*
+!web_interface/captures/.gitkeep
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Logs and temporary files
+*.log
+*.tmp
+tempCodeRunnerFile.py
+
+# Large unrelated project artifacts
+catboost_info/
+Bot_Iot_5%/
+UNSW/
+Research Projects/

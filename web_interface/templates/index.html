@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT DoS Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🛡️ IoT Network Intrusion Detection System</h1>
+            <p>Real-time DoS Attack Detection & Monitoring</p>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid">
+            <!-- Attacker Panel -->
+            <div class="panel attacker-panel">
+                <h2>🔴 Attacker Control</h2>
+                <div class="controls">
+                    <div class="form-group">
+                        <label for="target">Target:</label>
+                        <input type="text" id="target" value="127.0.0.1:80">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="attack-type">Attack Type:</label>
+                        <select id="attack-type">
+                            <option value="syn">SYN Flood</option>
+                            <option value="http">HTTP Flood</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="threads">Threads: <span id="thread-count">8</span></label>
+                        <input type="range" id="threads" min="1" max="16" value="8">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="start-attack" class="btn btn-danger">🚀 Launch Attack</button>
+                        <button id="stop-attack" class="btn btn-stop" disabled>⏹️ Stop</button>
+                    </div>
+                </div>
+                
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <span class="stat-label">Status:</span>
+                        <span id="attack-status" class="stat-value">Idle</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Packets Sent:</span>
+                        <span id="packet-count" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Rate:</span>
+                        <span id="packet-rate" class="stat-value">0 pkt/s</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Elapsed:</span>
+                        <span id="attack-elapsed" class="stat-value">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Monitor Panel -->
+            <div class="panel server-panel">
+                <h2>🛡️ Server Monitor</h2>
+                
+                <div id="detection-alert" class="alert alert-success">
+                    <span class="status-icon">✅</span>
+                    <span class="status-text">Normal Traffic</span>
+                </div>
+                
+                <div class="confidence-section">
+                    <label>DoS Detection Confidence:</label>
+                    <div class="progress-bar">
+                        <div id="confidence-bar" class="progress-fill"></div>
+                    </div>
+                    <span id="confidence-value" class="confidence-text">0%</span>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="traffic-chart"></canvas>
+                </div>
+                
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <span class="stat-label">Packets Analyzed:</span>
+                        <span id="packets-analyzed" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Detection Status:</span>
+                        <span id="detection-status" class="stat-value">Monitoring</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Simulator Panel -->
+            <div class="panel client-panel">
+                <h2>👤 Client Simulator</h2>
+                <div class="controls">
+                    <div class="form-group">
+                        <label for="client-url">Target URL:</label>
+                        <input type="text" id="client-url" value="http://127.0.0.1:5000/health">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="client-rate">Request Rate: <span id="client-rate-value">10 req/s</span></label>
+                        <input type="range" id="client-rate" min="1" max="100" value="10">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="start-client" class="btn btn-primary">🌐 Start Normal Traffic</button>
+                        <button id="stop-client" class="btn btn-stop" disabled>⏹️ Stop</button>
+                    </div>
+                </div>
+                
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <span class="stat-label">Status:</span>
+                        <span id="client-status" class="stat-value">Idle</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Requests:</span>
+                        <span id="request-count" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Rate:</span>
+                        <span id="request-rate" class="stat-value">0 req/s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Panel -->
+            <div class="panel analytics-panel">
+                <h2>📊 Feature Analysis</h2>
+                <div class="chart-container">
+                    <canvas id="features-chart"></canvas>
+                </div>
+                
+                <div class="feature-list" id="feature-values">
+                    <p class="feature-help">Real-time DoS detection features will appear here</p>
+                </div>
+            </div>
+
+            <!-- Edge Device Simulation Panel -->
+            <div class="panel edge-panel" id="edge-panel">
+                <h2>🔧 Edge Device Simulation</h2>
+                
+                <div class="edge-toggle-section">
+                    <div class="edge-toggle-row">
+                        <span class="edge-toggle-label">Simulate Raspberry Pi 5</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="edge-mode-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="edge-device-badge" class="device-badge device-laptop">
+                        💻 Running on: Laptop (x86_64)
+                    </div>
+                </div>
+
+                <div class="edge-specs">
+                    <h3>Device Specifications</h3>
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>Resource</th>
+                                <th id="spec-col-laptop" class="spec-active">💻 Laptop</th>
+                                <th id="spec-col-rpi">🍓 RPi 5</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CPU</td>
+                                <td>x86_64 ~3.5GHz</td>
+                                <td>ARM A76 2.4GHz</td>
+                            </tr>
+                            <tr>
+                                <td>Cores Used</td>
+                                <td>1 (constrained)</td>
+                                <td>1 of 4</td>
+                            </tr>
+                            <tr>
+                                <td>RAM Budget</td>
+                                <td>Unrestricted</td>
+                                <td>512 MB</td>
+                            </tr>
+                            <tr>
+                                <td>Detection Window</td>
+                                <td id="spec-window-laptop">1.0s</td>
+                                <td id="spec-window-rpi">2.0s</td>
+                            </tr>
+                            <tr>
+                                <td>Inference Speed</td>
+                                <td id="spec-speed-laptop">—</td>
+                                <td id="spec-speed-rpi">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="edge-metrics">
+                    <h3>Live Performance Metrics</h3>
+                    <div class="stats-box">
+                        <div class="stat-item">
+                            <span class="stat-label">Model Size:</span>
+                            <span id="edge-model-size" class="stat-value">—</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Inference Time:</span>
+                            <span id="edge-inference-time" class="stat-value">—</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg Inference:</span>
+                            <span id="edge-avg-inference" class="stat-value">—</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Predictions:</span>
+                            <span id="edge-total-preds" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Threads:</span>
+                            <span id="edge-threads" class="stat-value">1 (single-threaded)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Slowdown Factor:</span>
+                            <span id="edge-slowdown" class="stat-value">1x</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edge-verdict" id="edge-verdict">
+                    <div class="verdict-icon">✅</div>
+                    <div class="verdict-text">
+                        <strong>Edge Deployment Feasible</strong><br>
+                        <span id="verdict-detail">LightGBM model (75KB, 300 trees) runs single-threaded inference in &lt;5ms on ARM — well within real-time requirements.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>IoT DoS Detection System | LightGBM Model | Real-time Monitoring</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

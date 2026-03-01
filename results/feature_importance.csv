@@ -1,0 +1,12 @@
+Feature,Label,Importance
+tcprtt,TCP RTT,11
+dpkts,Dst Packets,11
+ackdat,ACK-DAT RTT,38
+synack,SYN-ACK RTT,60
+dmean,Dst Pkt Size (mean),81
+ct_dst_ltm,Conn to Same Dst,512
+ct_srv_dst,Conn to Same Srv (dst),943
+rate,Packet Rate,1240
+sload,Src Byte Rate,1258
+ct_srv_src,Conn to Same Srv (src),1478
+sbytes,Src Bytes,2791
